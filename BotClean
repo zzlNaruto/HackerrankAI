@@ -1,0 +1,58 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BotClean
+{
+    class Program
+    {
+        static void Main(String[] args)
+        {
+            String temp = Console.ReadLine();
+            String[] position = temp.Split(' ');
+            int[] pos = new int[2];
+            String[] board = new String[5];
+            for (int i = 0; i < 5; i++)
+            {
+                board[i] = Console.ReadLine();
+            }
+            for (int i = 0; i < 2; i++) pos[i] = Convert.ToInt32(position[i]);
+            next_move(pos[0], pos[1], board);
+        }
+        static void next_move(int posr, int posc, String[] board)
+        {
+            int[] mp = new int[2];//机器人当前位置
+            mp[0] = posc;
+            mp[1] = posr;
+            int[] pp = new int[2];//当前行有需要清理的点时，左右移动，没有则向下移动
+            string temp = board[posr];
+            int x = temp.IndexOf("d");
+            if (x > -1)
+            {
+                pp[0] = x;
+                pp[1] = posr;
+                if (pp[0] == mp[0] && pp[1] == mp[1])//相同则清理
+                {
+                    Console.WriteLine("CLEAN");
+                }
+                else if (pp[0] != mp[0] && pp[1] == mp[1])//同一行有脏点
+                {
+                    if (pp[0] > mp[0])//脏点在机器人右边
+                    {
+                        Console.WriteLine("RIGHT");
+                    }
+                    else
+                    {
+                        Console.WriteLine("LEFT");
+                    }
+                }
+            }
+            else//同一行没有脏点，下一
+            {
+                Console.WriteLine("DOWN");
+            }
+        }
+    }
+}
