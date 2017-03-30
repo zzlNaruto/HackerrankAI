@@ -1,0 +1,69 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BotSavesPrincess2
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int n;
+            n = int.Parse(Console.ReadLine());
+            String pos;
+            pos = Console.ReadLine();
+            String[] position = pos.Split(' ');
+            int[] int_pos = new int[2];
+            int_pos[0] = Convert.ToInt32(position[0]);
+            int_pos[1] = Convert.ToInt32(position[1]);
+            String[] grid = new String[n];
+            for (int i = 0; i < n; i++)
+            {
+                grid[i] = Console.ReadLine();
+            }
+            nextMove(n, int_pos[0], int_pos[1], grid);
+        }
+        static void nextMove(int n, int r, int c, String[] grid)
+        {
+            int[] mp = new int[2];
+            int[] pp = new int[2];
+            for (int i = 0; i < n; i++)
+            {
+                mp[0] = c;
+                mp[1] = r;
+                string temp = grid[i];
+                int x = temp.IndexOf("p");
+                if (x > -1)
+                {
+                    pp[0] = x;
+                    pp[1] = i;
+                }
+            }
+            int xf = mp[0] - pp[0];
+            int yf = mp[1] - pp[1];
+            bool b = false;
+            if (xf > 0 && b == false)
+            {
+                Console.WriteLine("LEFT");
+                b = true;
+            }
+            else if (xf < 0 && b == false)
+            {
+                Console.WriteLine("RIGHT");
+                b = true;
+            }
+            if (yf > 0 && b == false)
+            {
+                Console.WriteLine("UP");
+                b = true;
+            }
+            else if (yf < 0 && b == false)
+            {
+                Console.WriteLine("DOWN");
+                b = true;
+            }
+        }
+    }
+}
