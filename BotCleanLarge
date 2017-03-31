@@ -1,0 +1,89 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BotCleanLarge
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            String temp = Console.ReadLine();
+            String[] position = temp.Split(' ');
+            int[] pos = new int[2];
+            for (int i = 0; i < 2; i++) pos[i] = Convert.ToInt32(position[i]);
+            String[] dimension = Console.ReadLine().Split(' ');
+            int[] dim = new int[2];
+            for (int i = 0; i < 2; i++) dim[i] = Convert.ToInt32(dimension[i]);
+            String[] board = new String[dim[0]];
+            for (int i = 0; i < dim[0]; i++)
+            {
+                board[i] = Console.ReadLine();
+            }
+            next_move(pos[0], pos[1], dim[0], dim[1], board);
+        }
+        static void next_move(int posr, int posc, int dimh, int dimw, String[] board)
+        {
+            int[] botP = new int[2];
+            botP[0] = posc;
+            botP[1] = posr;
+            int[] nstP = new int[2];
+            nstP[0] = -1;
+            for (int h=0;h<dimh;h++)//获取所有脏点，找出离机器人最近的一个
+            {
+                for(int w = 0;w<dimw;w++)
+                {
+                    String str_w = board[h];
+                    String str_wh = str_w.Substring(w, 1);
+                    if(str_wh == "d")
+                    { 
+                        if(nstP[0] == -1)
+                        {
+                            nstP[0] = w;
+                            nstP[1] = h;
+                        }
+                        else
+                        {
+                            int newdistance = Math.Abs(w - posc) + Math.Abs(h-posr);
+                            int olddistance = Math.Abs(nstP[0] - posc) + Math.Abs(nstP[1] - posr);
+                            if(newdistance< olddistance)
+                            {
+                                nstP[0] = w;
+                                nstP[1] = h;
+                            }
+                        }
+                    }
+                }
+            }
+            //如果最近的点就是自己所在的点则清理，否则将机器人向最近的点移动
+            if (botP[0] == nstP[0] && botP[1] == nstP[1])//相同则清理
+            {
+                Console.WriteLine("CLEAN");
+            }
+            else if (botP[0] != nstP[0])//不在同一列
+            {
+                if (botP[0] > nstP[0])//机器人在脏点右边
+                {
+                    Console.WriteLine("LEFT");
+                }
+                else
+                {
+                    Console.WriteLine("RIGHT");
+                }
+            }
+            else if (botP[1] != nstP[1])//不在同一行
+            {
+                if (botP[1] > nstP[1])//机器人在脏点下边
+                {
+                    Console.WriteLine("UP");
+                }
+                else
+                {
+                    Console.WriteLine("DOWN");
+                }
+            } 
+        }
+    }
+}
