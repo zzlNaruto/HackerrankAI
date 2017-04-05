@@ -1,0 +1,316 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+
+namespace BotCleanPartiallyObservable
+{
+    class Program
+    {
+        static ArrayList al_AMP = new ArrayList();
+        static ArrayList al_DP = new ArrayList();
+        static int TargetNumber;
+        class Class_Cache
+        {
+            public static void NewTargetNumber()
+            {
+                try
+                {
+                    string dir = Environment.CurrentDirectory;
+                    string filename = dir + "/" + "TargetNumber.txt";
+                    if (File.Exists(filename) == false)
+                    {
+                        StreamWriter SW;
+                        SW = File.CreateText(filename);
+                        SW.Close();
+                        FileStream fst = new FileStream(filename, FileMode.Append);
+                        StreamWriter swt = new StreamWriter(fst, System.Text.Encoding.GetEncoding("UTF-8"));
+                        swt.WriteLine("0");
+                        swt.Close();
+                        fst.Close();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+            }
+            public static void AddTargetNumber()
+            {
+                try
+                {
+                    string dir = Environment.CurrentDirectory;
+                    string filename = dir + "/" + "TargetNumber.txt";
+                    if (File.Exists(filename) == true)
+                    {
+                        StreamReader sr = new StreamReader(filename, Encoding.UTF8);
+                        String temp;
+                        string line = "";
+                        while ((temp = sr.ReadLine()) != null)
+                        {
+                            line = temp;
+                        }
+                        sr.Close();
+                        int number = int.Parse(line);
+                        number++;
+                        if (number <= al_AMP.Count)
+                        {
+                            FileStream fst = new FileStream(filename, FileMode.Create);
+                            StreamWriter swt = new StreamWriter(fst, System.Text.Encoding.GetEncoding("UTF-8"));
+                            swt.WriteLine(number);
+                            swt.Close();
+                            fst.Close();
+                            TargetNumber = number;
+                        }
+                        else
+                        {
+                            DeleteTargetNumber();
+                        }
+                    }
+                    else
+                    {
+
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
+            }
+            public static int GetTargetNumber()
+            {
+                int number = 0;
+                try
+                {
+                    string dir = Environment.CurrentDirectory;
+                    string filename = dir + "/" + "TargetNumber.txt";
+                    if (File.Exists(filename) == true)
+                    {
+                        StreamReader sr = new StreamReader(filename, Encoding.UTF8);
+                        String temp;
+                        string line = "";
+                        while ((temp = sr.ReadLine()) != null)
+                        {
+                            line = temp;
+                        }
+                        sr.Close();
+                        number = int.Parse(line);
+                    }
+                    else
+                    {
+                        Console.WriteLine("没有TargetNumber文件夹:" + TargetNumber);
+                    }
+                    return number;
+                }
+                catch
+                {
+                    return number;
+                }
+            }
+            public static void DeleteTargetNumber()
+            {
+                try
+                {
+                    string dir = Environment.CurrentDirectory;
+                    string filename = dir + "\\" + "TargetNumber.txt"; ;
+                    if (File.Exists(filename) == true)
+                    {
+                        File.Delete(filename);
+                    }
+                }
+                catch
+                {
+
+                }
+            }
+            static void Main(string[] args)
+            {
+                String temp = Console.ReadLine();
+                String[] position = temp.Split(' ');
+                int[] pos = new int[2];
+                String[] board = new String[5];
+                for (int i = 0; i < 5; i++)
+                {
+                    board[i] = Console.ReadLine();
+                }
+                if (al_AMP.Count == 0)
+                    GotAllMustPoint(board);//获取所有必须去的点
+                for (int i = 0; i < 2; i++) pos[i] = Convert.ToInt32(position[i]);
+                Class_Cache.NewTargetNumber();
+                TargetNumber = Class_Cache.GetTargetNumber();
+                next_move(pos[0], pos[1], board);
+            }
+
+            static void GotAllMustPoint(String[] board)
+            {
+                string temp = board[0];
+                int remainder_c = temp.Length % 3;
+                int count_c = temp.Length / 3;
+                int remainder_r = board.Length % 3;
+                int count_r = board.Length / 3;
+                for (int c = 0; c < count_c; c++)
+                {
+                    int[] point = new int[2];
+                    for (int r = 0; r < count_r; r++)
+                    {
+                        point = new int[2];
+                        point[0] = 1 + c * 3;
+                        point[1] = 1 + r * 3;
+                        al_AMP.Add(point);
+                        if (remainder_r != 0 && c == count_c - 1)
+                        {
+                            point = new int[2];
+                            point[0] = 1 + c * 3;
+                            point[1] = count_r * 3;
+                            al_AMP.Add(point);
+                        }
+                        if (remainder_c != 0 && r == count_r - 1)
+                        {
+                            point = new int[2];
+                            point[0] = count_c * 3;
+                            point[1] = 1 + r * 3;
+                            al_AMP.Add(point);
+                        }
+                    }
+                }
+                if (remainder_c != 0 && remainder_r != 0)
+                {
+                    int[] point_temp = new int[2];
+                    point_temp[0] = 3 * count_c;
+                    point_temp[1] = 3 * count_r;
+                    al_AMP.Add(point_temp);
+                }
+            }
+            static void next_move(int posr, int posc, String[] board)
+            {
+                if (al_DP.Count > 0)
+                {
+                    int[] NPoint = (int[])al_DP[0];
+                    ClearPoint(posr, posc, NPoint[1], NPoint[0]);
+                }
+                else if (TargetNumber < al_AMP.Count)
+                {
+                    int[] NPoint = (int[])al_AMP[TargetNumber];
+                    GotoNstP(posr, posc, NPoint[1], NPoint[0], board);
+                }
+            }
+            static void ClearPoint(int posr, int posc, int Nr, int Nc)
+            {
+                int[] botP = new int[2];
+                botP[0] = posc;
+                botP[1] = posr;
+                int[] nstP = new int[2];
+                nstP[0] = Nc;
+                nstP[1] = Nr;
+                if (botP[0] == nstP[0] && botP[1] == nstP[1])
+                {
+                    Console.WriteLine("CLEAN");
+                    al_DP.RemoveAt(0);
+                }
+                else
+                {
+                    moveto(posr, posc, nstP[1], nstP[0]);
+                }
+            }
+            static void GotoNstP(int posr, int posc, int Nr, int Nc, String[] board)//去指定点
+            {
+                int[] botP = new int[2];
+                botP[0] = posc;
+                botP[1] = posr;
+                int[] nstP = new int[2];
+                nstP[0] = Nc;
+                nstP[1] = Nr;
+                if (botP[0] == nstP[0] && botP[1] == nstP[1])//到达其中一个目的地
+                {
+                    //到达目的地后搜走周围的点，如果有脏点去清理，全部清理完成后去往下一个点
+                    Class_Cache.AddTargetNumber();
+                    for (int h = 0; h < board.Length; h++)//获取所有脏点，找出离机器人最近的一个
+                    {
+                        for (int w = 0; w < board.Length; w++)
+                        {
+                            String str_w = board[h];
+                            String str_wh = str_w.Substring(w, 1);
+                            if (str_wh == "d")
+                            {
+                                int[] point_temp = new int[2];
+                                point_temp[0] = w;
+                                point_temp[1] = h;
+                                al_DP.Add(point_temp);
+                            }
+                        }
+                    }
+                    if (al_DP.Count > 0)
+                    {
+                        int[] point_temp2 = (int[])al_DP[0];
+                        ClearPoint(posr, posc, point_temp2[1], point_temp2[0]);
+                    }
+                    else
+                    {
+                        int[] NPoint = (int[])al_AMP[TargetNumber];
+                        moveto(posr, posc, NPoint[1], NPoint[0]);
+                    }
+                }
+                else
+                {
+                    ClearAround(posr,posc,board);
+                }
+            }
+            static void moveto(int posr, int posc, int Nr, int Nc)
+            {
+                if (posc != Nc)//不在同一列
+                {
+                    if (posc > Nc)//机器人在脏点右边
+                    {
+                        Console.WriteLine("LEFT");
+                    }
+                    else
+                    {
+                        Console.WriteLine("RIGHT");
+                    }
+                }
+                else if (posr != Nr)//不在同一行
+                {
+                    if (posr > Nr)//机器人在脏点下边
+                    {
+                        Console.WriteLine("UP");
+                    }
+                    else
+                    {
+                        Console.WriteLine("DOWN");
+                    }
+                }
+            }
+            static void ClearAround(int posr,int posc,string[] board)
+            {
+                for (int h = 0; h < board.Length; h++)//获取所有脏点，找出离机器人最近的一个
+                {
+                    for (int w = 0; w < board.Length; w++)
+                    {
+                        String str_w = board[h];
+                        String str_wh = str_w.Substring(w, 1);
+                        if (str_wh == "d")
+                        {
+                            int[] point_temp = new int[2];
+                            point_temp[0] = w;
+                            point_temp[1] = h;
+                            al_DP.Add(point_temp);
+                        }
+                    }
+                }
+                if (al_DP.Count > 0)
+                {
+                    int[] point_temp2 = (int[])al_DP[0];
+                    ClearPoint(posr, posc, point_temp2[1], point_temp2[0]);
+                }
+                else
+                {
+                    int[] NPoint = (int[])al_AMP[TargetNumber];
+                    moveto(posr, posc, NPoint[1], NPoint[0]);
+                }
+            }
+        }
+    }
+}
