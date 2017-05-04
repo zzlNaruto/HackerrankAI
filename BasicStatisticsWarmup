@@ -1,0 +1,90 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BasicStatisticsWarmup
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int N;
+            N = int.Parse(Console.ReadLine());
+            String[] str_array = Console.ReadLine().Split(' ');
+            decimal[] dec_array = Array.ConvertAll(str_array, decimal.Parse);
+            //将所有数进行冒泡排序
+            for(int i=0;i<N-1;i++)
+            {
+                for(int j=0;j<N-i-1;j++)
+                {
+                    decimal temp = dec_array[j+1];
+                    if (dec_array[j] > temp)
+                    {
+                        dec_array[j+1] = dec_array[j];
+                        dec_array[j] = temp;
+                    }
+                }
+            }
+            //Mean (m)
+            decimal mean = 0m;
+            decimal allSum = 0m;
+            for (int i=0;i<N;i++)
+            {
+                allSum += dec_array[i];
+            }
+            mean = allSum / N;
+            mean = Math.Round(mean, 1);
+            Console.WriteLine(mean);
+            //Median of this array
+            int median_index = 0;
+            decimal median = 0m;
+            decimal remainder = N % 2;
+            if (remainder != 0)//奇数时X（N+1）/2
+            {
+                median_index = (N + 1) / 2;
+                median = dec_array[median_index];
+            }
+            else//偶数时为（X:（N/2）+X:（N/2+1））/2
+            {
+                median_index = N / 2;
+                median = (dec_array[median_index-1]+ dec_array[median_index])/2;//(从0开始计数，所以减一)
+            }
+            Console.WriteLine(median);
+            //Mode
+            decimal mode = 0m;
+            var res = from n in dec_array
+                      group n by n into g
+                      orderby g.Count() descending
+                      select g;
+            // 分组中第一个组就是重复最多的
+            var gr = res.First();
+            foreach (decimal f in gr)
+            {
+                mode = f;
+            }
+            Console.WriteLine(mode);
+            //Standard Deviation (SD);SD = (((x1-m)2+(x2-m)2+(x3-m)2+(x4-m)2+...(xN-m)2))/N)0.5
+            decimal sumsqu = 0m;
+            for(int i=0;i<N;i++)
+            {
+                sumsqu += Convert.ToDecimal(Math.Pow(Convert.ToDouble(dec_array[i] - mean),2));
+            }
+            decimal sd = 0m;
+            sumsqu = sumsqu / N;
+            sd = Math.Round(Convert.ToDecimal(Math.Pow(Convert.ToDouble(sumsqu), 0.5)),1);
+            Console.WriteLine(sd);
+            //95% Confidence Interval for the mean;a(95% 平均值的置信区间)= m（平均值）+/- 1.96*(sd(标准差)2次方)
+            //Pr(c1<=μ<=c2)=1-α
+            //α是显著性水平（例：0.05或0.10）
+            //100 % *（1 - α）指置信水平（例：95 % 或90 %）
+            //表达方式：interval（c1,c2)——置信区间。
+            decimal c1 = 0m;
+            c1 = Math.Round(mean - Convert.ToDecimal(1.96) * (sd/Convert.ToDecimal(Math.Sqrt(N))),1);
+            decimal c2 = 0m;
+            c2 = Math.Round(mean + Convert.ToDecimal(1.96) * (sd / Convert.ToDecimal(Math.Sqrt(N))), 1);
+            Console.WriteLine(c1+" "+c2);
+        }
+    }
+}
